@@ -1,0 +1,11 @@
+<!-- src/views/home.ejs -->
+<%- include('partials/header', { cssFile: 'home', user: null }) %>
+    <div class="hero">
+        <h1>Welcome to Tradaa</h1>
+        <p>Your ultimate stock analysis and alert platform.</p>
+        <div class="cta">
+            <a href="/auth/login" class="btn">Login</a>
+            <a href="/auth/register" class="btn">Register</a>
+        </div>
+    </div>
+<%- include('partials/footer') %>

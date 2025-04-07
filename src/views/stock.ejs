@@ -1,0 +1,450 @@
+<%- include('partials/header', { cssFile: 'stock', user: user }) %>
+    <div id="analysis-result">
+        <h2>Analysis Results (<%= timeframe || 'daily' %> timeframe)</h2>
+        
+        <!-- Timeframe Toggle -->
+        <div class="timeframe-toggle">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Timeframe</h5>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group" role="group" aria-label="Timeframe Toggle">
+                        <a href="?timeframe=daily" 
+                           class="btn <%= !timeframe || timeframe === 'daily' ? 'btn-primary' : 'btn-outline-primary' %>"
+                           id="daily-timeframe">Daily</a>
+                        <a href="?timeframe=weekly" 
+                           class="btn <%= timeframe === 'weekly' ? 'btn-primary' : 'btn-outline-primary' %>"
+                           id="weekly-timeframe">Weekly</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading data...</p>
+        </div>
+
+        <% 
+        // Initialize stock arrays
+        let nigerianStocks = [];
+        let usStocks = [];
+        let cryptoStocks = [];
+
+        // Stock lists
+        const NIGERIAN_STOCK_SYMBOLS = [
+            "ACCESS.NG", "FBNH.NG", "FCMB.NG", "FIDELITYBK.NG", "GTCO.NG", 
+            "JAIZBANK.NG", "STERLNBANK.NG", "UBA.NG", "UNIONBANK.NG", "WEMABANK.NG",
+            "ZENITHBANK.NG", "ARDOVA.NG", "CONOIL.NG", "ETERNA.NG", "MOBIL.NG", 
+            "OANDO.NG", "SEPLAT.NG", "TOTAL.NG", "CADBURY.NG", "DANGSUGAR.NG", 
+            "FLOURMILL.NG", "GUINNESS.NG", "HONYFLOUR.NG", "NASCON.NG", "NESTLE.NG", 
+            "PZ.NG", "UNILEVER.NG", "BUACEMENT.NG", "CUTIX.NG", "DANGCEM.NG", 
+            "WAPCO.NG", "FIDSON.NG", "GLAXOSMITH.NG", "MAYBAKER.NG", "NEIMETH.NG",
+            "OKOMUOIL.NG", "PRESCO.NG", "PRESTIGE.NG", "FTNCOCOA.NG", "SCOA.NG", 
+            "TRANSCORP.NG", "UACN.NG", "CHAMS.NG", "CORNERST.NG", "ETRANZACT.NG", 
+            "NCR.NG", "AIICO.NG", "CUSTODIAN.NG", "LASACO.NG", "LINKASSURE.NG", 
+            "MANSARD.NG", "NEM.NG", "REGALINS.NG", "ROYALEX.NG", "STACO.NG", 
+            "VERITASKAP.NG", "ABCTRANS.NG", "ACADEMY.NG", "ARDOVA.NG", "CAVERTON.NG", 
+            "CHELLARAM.NG", "ELLAHLAKES.NG", "GOLDBREW.NG", "JBERGER.NG", "LEARNAFRCA.NG", 
+            "MCNICHOLS.NG", "MRS.NG", "RTBRISCOE.NG", "TANTALIZERS.NG", "TRIPPLEG.NG", 
+            "UPDC.NG", "VITAFOAM.NG", "AFRIPRUD.NG", "ASOSAVINGS.NG", "BETAGLAS.NG", 
+            "BUAFOODS.NG", "CHAMPION.NG", "COURTVILLE.NG", "DEAPCAP.NG", "EUNISELL.NG", 
+            "GOLDINSURE.NG", "GUINEAINS.NG", "IKEJAHOTEL.NG", "JOHNHOLT.NG", "JULI.NG", 
+            "LAWUNION.NG", "LIVESTOCK.NG", "MBENEFIT.NG", "MEDVIEWAIR.NG", "MEYER.NG", 
+            "MORISON.NG", "NAHCO.NG", "NASCO.NG", "NGXGROUP.NG", "NNFM.NG", "NOTORE.NG", 
+            "NPFMCRFBK.NG", "OASISINS.NG", "OMATEK.NG", "PHARMDEKO.NG", "PORTPAINT.NG", 
+            "PREMPAINTS.NG", "REDSTAREX.NG", "RESORTSAL.NG", "SKYAVN.NG", "SMURFIT.NG", 
+            "SOVERINS.NG", "THOMASWY.NG", "TIGERBRAND.NG", "TRANSEXPR.NG", "UCAP.NG", 
+            "UNHOMES.NG", "UNIONDICON.NG", "UNIVINSURE.NG", "VFDGROUP.NG", "WAPIC.NG"
+        ];
+
+        const US_STOCK_SYMBOLS = [
+            "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "META", "NVDA", "BRK.B", "JNJ", 
+            "V", "WMT", "PG", "MA", "UNH", "HD", "DIS", "BAC", "PYPL", "CMCSA", "ADBE", 
+            "NFLX", "PEP", "INTC", "CSCO", "CRM", "ABT", "TMO", "COST", "XOM", "CVX", 
+            "PFE", "MRK", "ABBV", "DHR", "LIN", "AVGO", "ACN", "ORCL", "QCOM", "TXN", 
+            "NKE", "MDT", "LOW", "UPS", "SBUX", "AMD", "INTU", "AMGN", "GS", "BLK",
+            "AAL", "ADP", "ALGN", "AMAT", "ASML", "ATVI", "BIDU", "BIIB", "BKNG", "CDNS", 
+            "CHTR", "CME", "COIN", "CSX", "CTAS", "CTSH", "DDOG", "DLTR", "EA", "EBAY", 
+            "EXC", "FAST", "FISV", "GILD", "GOOG", "HON", "IDXX", "ILMN", "INTC", "INTU", 
+            "ISRG", "JD", "KDP", "KHC", "KLAC", "LRCX", "LULU", "MAR", "MCHP", "MELI", 
+            "MNST", "MRNA", "MRVL", "MTCH", "MU", "NFLX", "NTES", "NXPI", "ODFL", "ON"
+        ];
+
+        const CRYPTO_SYMBOLS = [
+            "BTC-USD", "ETH-USD", "BNB-USD", "XRP-USD", "ADA-USD", "SOL-USD", "DOGE-USD",
+            "DOT-USD", "AVAX-USD", "MATIC-USD", "LINK-USD", "UNI-USD", "ATOM-USD", 
+            "LTC-USD", "ALGO-USD", "XLM-USD", "FIL-USD", "NEAR-USD", "ETC-USD", "HBAR-USD",
+            "USDT-USD", "USDC-USD", "DAI-USD", "BUSD-USD", "AAVE-USD", "MKR-USD", 
+            "CRV-USD", "COMP-USD", "YFI-USD", "AXS-USD", "MANA-USD", "SAND-USD", 
+            "ENJ-USD", "GALA-USD", "OP-USD", "ARB-USD", "IMX-USD", "LRC-USD", "ZKS-USD"
+        ];
+
+        // Categorize stocks if results exist
+        if (results && results.length > 0) {
+            results.forEach(stock => {
+                const symbol = stock.symbol;
+                if (CRYPTO_SYMBOLS.includes(symbol)) {
+                    cryptoStocks.push(stock);
+                } else if (NIGERIAN_STOCK_SYMBOLS.includes(symbol)) {
+                    nigerianStocks.push(stock);
+                } else if (US_STOCK_SYMBOLS.includes(symbol)) {
+                    usStocks.push(stock);
+                }
+            });
+        }
+
+        // Function to group stocks by recommendation
+        function groupByRecommendation(stocks) {
+            return {
+                strongBuy: stocks.filter(s => s.recommendation === 'Strong Buy'),
+                buy: stocks.filter(s => s.recommendation === 'Buy'),
+                hold: stocks.filter(s => s.recommendation === 'Hold'),
+                sell: stocks.filter(s => s.recommendation === 'Sell'),
+                strongSell: stocks.filter(s => s.recommendation === 'Strong Sell')
+            };
+        }
+
+        // Function to render recommendation table
+        function renderRecommendationTable(stocks, highlightSymbol) { %>
+            <% if (stocks && stocks.length > 0) { %>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Symbol</th>
+                            <th>Auto Chart</th>
+                            <th>Elliot Wave</th>
+                            <th>MACD</th>
+                            <th>Cycles</th>
+                            <th>Patterns</th>
+                            <th>Category</th>
+                            <th>Signal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% stocks.forEach(stock => { %>
+                            <tr class="<%= stock.symbol === highlightSymbol ? 'highlighted-row' : '' %>">
+                                <td><a href="/stock/<%= stock.symbol %>?timeframe=<%= timeframe || 'daily' %>"><%= stock.symbol %></a></td>
+                                <td class="signal-<%= stock.indicators[0].signal %>"><%= stock.indicators[0].result ? '✓' : '✗' %></td>
+                                <td class="signal-<%= stock.indicators[1].signal %>"><%= stock.indicators[1].result ? '✓' : '✗' %></td>
+                                <td class="signal-<%= stock.indicators[2].signal %>"><%= stock.indicators[2].result ? '✓' : '✗' %></td>
+                                <td class="signal-<%= stock.indicators[3].signal %>"><%= stock.indicators[3].result ? '✓' : '✗' %></td>
+                                <td class="signal-<%= stock.indicators[4].signal %>"><%= stock.indicators[4].result ? '✓' : '✗' %></td>
+                                <td class="category-<%= stock.category.toLowerCase().replace(' ', '-') %>"><%= stock.category %></td>
+                                <td class="recommendation-<%= stock.recommendation.toLowerCase().replace(' ', '-') %>"><%= stock.recommendation %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            <% } else { %>
+                <p class="no-stocks">No stocks in this category</p>
+            <% } %>
+        <% } %>
+
+        <!-- Nigerian Stocks Section -->
+        <% if (nigerianStocks.length > 0) { %>
+            <div class="market-section">
+                <h3>Nigerian Stocks</h3>
+                <% const nigerianGroups = groupByRecommendation(nigerianStocks); %>
+                
+                <div class="recommendation-section">
+                    <h4>Strong Buy Recommendations</h4>
+                    <% renderRecommendationTable(nigerianGroups.strongBuy, symbol) %>
+                </div>
+
+                <div class="recommendation-section">
+                    <h4>Buy Recommendations</h4>
+                    <% renderRecommendationTable(nigerianGroups.buy, symbol) %>
+                </div>
+
+                <div class="recommendation-section">
+                    <h4>Hold Recommendations</h4>
+                    <% renderRecommendationTable(nigerianGroups.hold, symbol) %>
+                </div>
+
+                <div class="recommendation-section">
+                    <h4>Sell Recommendations</h4>
+                    <% renderRecommendationTable(nigerianGroups.sell, symbol) %>
+                </div>
+
+                <div class="recommendation-section">
+                    <h4>Strong Sell Recommendations</h4>
+                    <% renderRecommendationTable(nigerianGroups.strongSell, symbol) %>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- US Stocks Section -->
+        <% if (usStocks.length > 0) { %>
+            <div class="market-section">
+                <h3>US Stocks</h3>
+                <% const usGroups = groupByRecommendation(usStocks); %>
+                
+                <div class="recommendation-section">
+                    <h4>Strong Buy Recommendations</h4>
+                    <% renderRecommendationTable(usGroups.strongBuy, symbol) %>
+                </div>
+
+                <div class="recommendation-section">
+                    <h4>Buy Recommendations</h4>
+                    <% renderRecommendationTable(usGroups.buy, symbol) %>
+                </div>
+
+                <div class="recommendation-section">
+                    <h4>Hold Recommendations</h4>
+                    <% renderRecommendationTable(usGroups.hold, symbol) %>
+                </div>
+
+                <div class="recommendation-section">
+                    <h4>Sell Recommendations</h4>
+                    <% renderRecommendationTable(usGroups.sell, symbol) %>
+                </div>
+
+                <div class="recommendation-section">
+                    <h4>Strong Sell Recommendations</h4>
+                    <% renderRecommendationTable(usGroups.strongSell, symbol) %>
+                </div>
+            </div>
+        <% } %>
+
+        <!-- Crypto Section -->
+        <% if (cryptoStocks.length > 0) { %>
+            <div class="market-section">
+                <h3>Cryptocurrency</h3>
+                <% renderRecommendationTable(cryptoStocks, symbol) %>
+            </div>
+        <% } %>
+
+        <% if (!results || results.length === 0) { %>
+            <div class="no-data">No results found.</div>
+        <% } %>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get the current URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentTimeframe = urlParams.get('timeframe') || 'daily';
+
+            // Add click handlers for timeframe buttons
+            document.getElementById('daily-timeframe').addEventListener('click', function(e) {
+                handleTimeframeChange(e, 'daily');
+            });
+
+            document.getElementById('weekly-timeframe').addEventListener('click', function(e) {
+                handleTimeframeChange(e, 'weekly');
+            });
+
+            function handleTimeframeChange(e, timeframe) {
+                e.preventDefault();
+                
+                // Show loading indicator
+                document.getElementById('loading-indicator').style.display = 'block';
+
+                // Get the current URL and update the timeframe parameter
+                const url = new URL(window.location.href);
+                url.searchParams.set('timeframe', timeframe);
+
+                // Navigate to the new URL
+                window.location.href = url.toString();
+            }
+
+            // Update active button states
+            const buttons = document.querySelectorAll('.timeframe-toggle .btn');
+            buttons.forEach(button => {
+                if (button.getAttribute('href').includes(currentTimeframe)) {
+                    button.classList.add('btn-primary');
+                    button.classList.remove('btn-outline-primary');
+                } else {
+                    button.classList.remove('btn-primary');
+                    button.classList.add('btn-outline-primary');
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .market-section {
+            margin-bottom: 40px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .market-section h3 {
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .recommendation-section {
+            margin-bottom: 30px;
+        }
+
+        .recommendation-section h4 {
+            color: #2c3e50;
+            margin: 20px 0 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #dee2e6;
+            font-size: 1.2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            background: #fff;
+        }
+
+        th, td {
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .no-stocks {
+            color: #6c757d;
+            text-align: center;
+            padding: 15px;
+            font-style: italic;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .signal-buy {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .signal-sell {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .highlighted-row {
+            background-color: rgba(0, 123, 255, 0.1);
+            font-weight: bold;
+        }
+
+        .category-very-strong { color: #28a745; font-weight: bold; }
+        .category-strong { color: #17a2b8; font-weight: bold; }
+        .category-solid { color: #ffc107; }
+        .category-weak { color: #dc3545; }
+        .category-very-weak { color: #dc3545; font-weight: bold; }
+
+        .recommendation-strong-buy {
+            color: #28a745;
+            font-weight: bold;
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+        .recommendation-buy {
+            color: #28a745;
+            background-color: rgba(40, 167, 69, 0.05);
+        }
+        .recommendation-hold { color: #ffc107; }
+        .recommendation-sell {
+            color: #dc3545;
+            background-color: rgba(220, 53, 69, 0.05);
+        }
+        .recommendation-strong-sell {
+            color: #dc3545;
+            font-weight: bold;
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+            
+            .market-section {
+                padding: 15px;
+            }
+        }
+
+        /* Add these new styles for the timeframe toggle */
+        .timeframe-toggle {
+            margin-bottom: 20px;
+        }
+
+        .timeframe-toggle .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .timeframe-toggle .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .timeframe-toggle .card-title {
+            margin: 0;
+            font-size: 1rem;
+            color: #495057;
+        }
+
+        .timeframe-toggle .btn-group {
+            width: 100%;
+            gap: 8px;
+        }
+
+        .timeframe-toggle .btn {
+            flex: 1;
+            padding: 8px 16px;
+            transition: all 0.2s ease;
+        }
+
+        .timeframe-toggle .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        #loading-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 10px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+<%- include('partials/footer') %>

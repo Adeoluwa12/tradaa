@@ -1,0 +1,27 @@
+<!-- src/views/partials/header.ejs -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tradaa</title>
+    <link rel="stylesheet" href="/css/<%= cssFile %>.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Tradaa</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <% if (user) { %>
+                        <li><a href="/dashboard">Dashboard</a></li>
+                        <li><a href="/auth/logout">Logout</a></li>
+                    <% } else { %>
+                        <li><a href="/auth/login">Login</a></li>
+                        <li><a href="/auth/register">Register</a></li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </header>

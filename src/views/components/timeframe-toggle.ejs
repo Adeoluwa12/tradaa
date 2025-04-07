@@ -1,0 +1,53 @@
+<div class="timeframe-toggle">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title">Timeframe</h5>
+      </div>
+      <div class="card-body">
+        <div class="btn-group" role="group" aria-label="Timeframe Toggle">
+          <button type="button" class="btn <%= timeframe === 'daily' ? 'btn-primary' : 'btn-outline-primary' %>" 
+                  id="daily-timeframe">Daily</button>
+          <button type="button" class="btn <%= timeframe === 'weekly' ? 'btn-primary' : 'btn-outline-primary' %>" 
+                  id="weekly-timeframe">Weekly</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    document.getElementById('daily-timeframe').addEventListener('click', function() {
+      changeTimeframe('daily');
+    });
+    
+    document.getElementById('weekly-timeframe').addEventListener('click', function() {
+      changeTimeframe('weekly');
+    });
+    
+    function changeTimeframe(timeframe) {
+      // Show loading indicator
+      document.getElementById('loading-indicator').style.display = 'block';
+      
+      // Get the current URL and update or add the timeframe parameter
+      const url = new URL(window.location.href);
+      url.searchParams.set('timeframe', timeframe);
+      
+      // Redirect to the new URL
+      window.location.href = url.toString();
+    }
+  </script>
+  
+  <style>
+    .timeframe-toggle {
+      margin-bottom: 20px;
+    }
+    
+    .timeframe-toggle .btn-group {
+      width: 100%;
+    }
+    
+    .timeframe-toggle .btn {
+      width: 50%;
+    }
+  </style>
+  
+  

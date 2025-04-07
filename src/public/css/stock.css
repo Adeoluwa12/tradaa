@@ -1,0 +1,424 @@
+Header Styles
+header {
+  background-color: #6200ea;
+  color: #ffffff;
+  padding: 10px 0;
+}
+
+header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+header h1 {
+  margin: 0;
+}
+
+header nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+header nav ul li {
+  margin-left: 20px;
+}
+
+header nav ul li a {
+  color: white;
+  text-decoration: none;
+}
+
+  
+  /* Footer Styles */
+  footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    margin-top: 20px;
+  }
+  
+  /* Body Styles */
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9;
+    color: #333;
+  }
+  
+  /* Stock Container */
+  .stock-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 20px;
+  }
+  
+  .stock-container h1,
+  .stock-container h2 {
+    margin-bottom: 20px;
+  }
+  
+  /* Analysis Result */
+  #analysis-result {
+    margin-bottom: 30px;
+  }
+  
+  /* Table Styles */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+  }
+  
+  table th,
+  table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  table th {
+    background-color: #6200ea;
+    color: white;
+  }
+  
+  table tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  table tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  /* Category Colors */
+  .category-very-strong {
+    color: #006400; /* Dark Green */
+    font-weight: bold;
+  }
+  
+  .category-strong {
+    color: #32cd32; /* Light Green */
+    font-weight: bold;
+  }
+  
+  .category-solid {
+    color: #ffd700; /* Yellow */
+    font-weight: bold;
+  }
+  
+  .category-weak {
+    color: #ff0000; /* Red */
+    font-weight: bold;
+  }
+  
+  /* TradingView Widget */
+  #tradingview-widget {
+    height: 500px;
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  
+
+  /* Add these styles to your existing stock.css */
+
+.timeframe-toggle {
+  margin-bottom: 20px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  padding: 10px 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.card-body {
+  padding: 15px;
+}
+
+.btn-group {
+  display: flex;
+  width: 100%;
+}
+
+.btn {
+  flex: 1;
+  padding: 8px 12px;
+  cursor: pointer;
+  border: 1px solid #007bff;
+  background-color: transparent;
+  color: #007bff;
+}
+
+.btn:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.btn:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-outline-primary {
+  background-color: transparent;
+  color: #007bff;
+}
+
+#loading-indicator {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #09f;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.highlighted-row {
+  background-color: rgba(0, 123, 255, 0.1);
+  font-weight: bold;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th,
+td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.category-very-strong {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.category-strong {
+  color: #17a2b8;
+  font-weight: bold;
+}
+
+.category-solid {
+  color: #ffc107;
+}
+
+.category-weak {
+  color: #dc3545;
+}
+
+#tradingview-widget {
+  height: 500px;
+  margin-top: 20px;
+}
+
+
+
+/* Add these styles to your existing stock.css */
+
+.timeframe-toggle {
+  margin-bottom: 20px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.card-header {
+  background-color: #f8f9fa;
+  padding: 10px 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.card-title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.card-body {
+  padding: 15px;
+}
+
+.btn-group {
+  display: flex;
+  width: 100%;
+}
+
+.btn {
+  flex: 1;
+  padding: 8px 12px;
+  cursor: pointer;
+  border: 1px solid #007bff;
+  background-color: transparent;
+  color: #007bff;
+}
+
+.btn:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.btn:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-outline-primary {
+  background-color: transparent;
+  color: #007bff;
+}
+
+#loading-indicator {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #09f;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.highlighted-row {
+  background-color: rgba(0, 123, 255, 0.1);
+  font-weight: bold;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+.category-very-strong {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.category-strong {
+  color: #17a2b8;
+  font-weight: bold;
+}
+
+.category-solid {
+  color: #ffc107;
+}
+
+.category-weak {
+  color: #dc3545;
+}
+
+.category-very-weak {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.recommendation-strong-buy {
+  color: #28a745;
+  font-weight: bold;
+  background-color: rgba(40, 167, 69, 0.1);
+}
+
+.recommendation-buy {
+  color: #28a745;
+  background-color: rgba(40, 167, 69, 0.05);
+}
+
+.recommendation-hold {
+  color: #ffc107;
+}
+
+.recommendation-sell {
+  color: #dc3545;
+  background-color: rgba(220, 53, 69, 0.05);
+}
+
+.recommendation-strong-sell {
+  color: #dc3545;
+  font-weight: bold;
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+.recommendation-very-strong-sell {
+  color: #dc3545;
+  font-weight: bold;
+  background-color: rgba(220, 53, 69, 0.2);
+}
+
+#tradingview-widget {
+  height: 500px;
+  margin-top: 20px;
+}

@@ -1,0 +1,35 @@
+ <%- include('partials/header', { cssFile: 'dashboard', user: user }) %>
+    <div class="dashboard-container">
+        <h1>Dashboard</h1>
+        <div class="actions">
+            <button onclick="viewStockChart()">View Stock Chart</button>
+            <button onclick="viewDailyReport()">View Daily Report</button>
+        </div>
+        <div id="alerts-section">
+            <h2>Latest Alerts</h2>
+            <% if (latestAlerts && latestAlerts.length > 0) { %>
+                <% latestAlerts.forEach(alert => { %>
+                    <div class="alert <%= alert.change > 0 ? 'alert-positive' : 'alert-negative' %>">
+                        <p>
+                            <%= alert.symbol %>: 
+                            <span class="change-indicator"><%= alert.change > 0 ? "↑" : "↓" %></span>
+                            <% if (alert.fallback) { %>
+                                <span class="no-data">No recent data</span>
+                            <% } else { %>
+                                <%= Math.abs(alert.change).toFixed(2) %>
+                                <% if (alert.previousPrice) { %>
+                                    (<%= ((alert.change / alert.previousPrice) * 100).toFixed(2) %>%)
+                                <% } %>
+                            <% } %>
+                        </p>
+                    </div>
+                <% }) %>
+                <button onclick="viewAllAlerts()" class="view-all-btn">View All Alerts</button>
+            <% } else { %>
+                <p>No alerts found.</p>
+            <% } %>
+        </div>
+    </div>
+    <script src="/js/dashboard.js"></script>
+<%- include('partials/footer') %>
+

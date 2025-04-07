@@ -1,0 +1,370 @@
+<%- include('partials/header', { cssFile: 'stock', user: user }) %>
+    <div class="stock-container">
+        <h1>Stock Analysis: <%= symbol %></h1>
+
+        <!-- Timeframe Toggle -->
+        <div class="timeframe-toggle">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Timeframe</h5>
+                </div>
+                <div class="card-body">
+                    <div class="btn-group" role="group" aria-label="Timeframe Toggle">
+                        <button type="button" class="btn <%= !timeframe || timeframe === 'daily' ? 'btn-primary' : 'btn-outline-primary' %>" 
+                                id="daily-timeframe">Daily</button>
+                        <button type="button" class="btn <%= timeframe === 'weekly' ? 'btn-primary' : 'btn-outline-primary' %>" 
+                                id="weekly-timeframe">Weekly</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading data...</p>
+        </div>
+
+        <% 
+        // Find the current stock from results
+        const currentStock = results && results.length > 0 ? results.find(stock => stock.symbol === symbol) : null;
+        
+        // Helper function to categorize stocks
+        function categorizeStock(symbol) {
+            // Crypto stocks typically have BTC, ETH, etc.
+            if (symbol.includes('BTC') || symbol.includes('ETH') || symbol.includes('XRP') || 
+                symbol.includes('LTC') || symbol.includes('DOGE') || symbol.includes('USDT') ||
+                symbol.includes('BNB') || symbol.includes('SOL') || symbol.includes('ADA') ||
+                symbol.includes('DOT') || symbol.includes('SHIB')) {
+                return 'crypto';
+            }
+            
+            // Nigerian stocks typically have .NGSE suffix or specific prefixes
+            if (symbol.includes('.NGSE') || symbol.startsWith('NG:') || 
+                ['DANGCEM', 'ZENITHBANK', 'GTCO', 'FBNH', 'UBA', 'ACCESSCORP', 
+                 'MTNN', 'AIRTELAFRI', 'BUACEMENT', 'NESTLE'].includes(symbol)) {
+                return 'nigerian';
+            }
+            
+            // Default to US stocks
+            return 'us';
+        }
+        
+        // Helper function to sort stocks by recommendation strength
+        function sortByRecommendation(stocks) {
+            const recommendationOrder = {
+                "Strong Buy": 1,
+                "Buy": 2,
+                "Hold": 3,
+                "Sell": 4,
+                "Strong Sell": 5
+            };
+            
+            return [...stocks].sort((a, b) => {
+                return recommendationOrder[a.recommendation] - recommendationOrder[b.recommendation];
+            });
+        }
+        
+        // Group and sort stocks
+        let nigerianStocks = [];
+        let usStocks = [];
+        let cryptoStocks = [];
+        
+        if (results && results.length > 0) {
+            results.forEach(stock => {
+                const category = categorizeStock(stock.symbol);
+                if (category === 'nigerian') {
+                    nigerianStocks.push(stock);
+                } else if (category === 'crypto') {
+                    cryptoStocks.push(stock);
+                } else {
+                    usStocks.push(stock);
+                }
+            });
+            
+            // Sort each group by recommendation
+            nigerianStocks = sortByRecommendation(nigerianStocks);
+            usStocks = sortByRecommendation(usStocks);
+            cryptoStocks = sortByRecommendation(cryptoStocks);
+        }
+        %>
+
+        <% if (currentStock) { %>
+            <!-- Final Recommendation -->
+            <div class="final-recommendation <%= currentStock.recommendation.toLowerCase().includes('buy') ? 'buy' : 'sell' %>">
+                <h2>
+                    Recommendation: 
+                    <span class="direction"><%= currentStock.recommendation.toUpperCase() %></span>
+                    <span class="confidence">(<%= currentStock.buySignals %> of <%= currentStock.buySignals + currentStock.sellSignals %> indicators)</span>
+                </h2>
+            </div>
+        <% } %>
+
+        <!-- TradingView Widget -->
+        <h2>Stock Chart</h2>
+        <div id="tradingview-widget"></div>
+
+        <!-- Analysis Results Tables -->
+        <div id="analysis-result">
+            <h2>Analysis Results (<%= timeframe || 'daily' %> timeframe)</h2>
+            
+            <!-- Table rendering function -->
+            <% function renderStockTable(stocks, title) { %>
+                <% if (stocks.length > 0) { %>
+                    <h3><%= title %></h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Stock</th>
+                                <th>Auto Chart Patterns</th>
+                                <th>Elliot Wave</th>
+                                <th>MACD Divergence</th>
+                                <th>Cycles Analysis</th>
+                                <th>All Chart Patterns</th>
+                                <th>Category</th>
+                                <th>Recommendation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% stocks.forEach(stock => { %>
+                                <tr class="<%= stock.symbol === symbol ? 'highlighted-row' : '' %>">
+                                    <td><a href="/stock/<%= stock.symbol %>?timeframe=<%= timeframe || 'daily' %>"><%= stock.symbol %></a></td>
+                                    <td class="signal-<%= stock.indicators[0].signal %>"><%= stock.indicators[0].result ? '✓' : '✗' %></td>
+                                    <td class="signal-<%= stock.indicators[1].signal %>"><%= stock.indicators[1].result ? '✓' : '✗' %></td>
+                                    <td class="signal-<%= stock.indicators[2].signal %>"><%= stock.indicators[2].result ? '✓' : '✗' %></td>
+                                    <td class="signal-<%= stock.indicators[3].signal %>"><%= stock.indicators[3].result ? '✓' : '✗' %></td>
+                                    <td class="signal-<%= stock.indicators[4].signal %>"><%= stock.indicators[4].result ? '✓' : '✗' %></td>
+                                    <td class="category-<%= stock.category.toLowerCase().replace(' ', '-') %>">
+                                        <%= stock.category %>
+                                    </td>
+                                    <td class="recommendation-<%= stock.recommendation.toLowerCase().replace(' ', '-') %>">
+                                        <%= stock.recommendation %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        </tbody>
+                    </table>
+                <% } %>
+            <% } %>
+            
+            <!-- Nigerian Stocks Table -->
+            <% renderStockTable(nigerianStocks, "Nigerian Stocks") %>
+            
+            <!-- US Stocks Table -->
+            <% renderStockTable(usStocks, "US Stocks") %>
+            
+            <!-- Crypto Stocks Table -->
+            <% renderStockTable(cryptoStocks, "Cryptocurrency") %>
+            
+            <% if (!results || results.length === 0) { %>
+                <div class="no-data">No results found.</div>
+            <% } %>
+        </div>
+    </div>
+
+    <script>
+        const symbol = "<%= symbol %>"; // Pass symbol to the script
+        const currentTimeframe = "<%= timeframe || 'daily' %>"; // Pass timeframe to the script
+        
+        document.getElementById('daily-timeframe').addEventListener('click', function() {
+            changeTimeframe('daily');
+        });
+        
+        document.getElementById('weekly-timeframe').addEventListener('click', function() {
+            changeTimeframe('weekly');
+        });
+        
+        function changeTimeframe(timeframe) {
+            // Show loading indicator
+            document.getElementById('loading-indicator').style.display = 'block';
+            
+            // Get the current URL and update or add the timeframe parameter
+            const url = new URL(window.location.href);
+            url.searchParams.set('timeframe', timeframe);
+            
+            // Redirect to the new URL
+            window.location.href = url.toString();
+        }
+    </script>
+    <script src="/js/stock.js"></script>
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script type="text/javascript">
+        // Adjust chart settings based on timeframe
+        const chartSettings = <%- JSON.stringify(chartData) %>;
+        
+        // If weekly timeframe, adjust interval
+        if (currentTimeframe === 'weekly') {
+            chartSettings.interval = 'W'; // Set to weekly interval
+        }
+        
+        new TradingView.widget(chartSettings);
+    </script>
+
+    <style>
+        .timeframe-toggle {
+            margin-bottom: 20px;
+        }
+        
+        .timeframe-toggle .btn-group {
+            width: 100%;
+        }
+        
+        .timeframe-toggle .btn {
+            width: 50%;
+        }
+        
+        #loading-indicator {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .highlighted-row {
+            background-color: rgba(0, 123, 255, 0.1);
+            font-weight: bold;
+        }
+        
+        /* Final Recommendation Styles */
+        .final-recommendation {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+        }
+        .final-recommendation.buy {
+            background-color: rgba(40, 167, 69, 0.1);
+            border-left: 4px solid #28a745;
+        }
+        .final-recommendation.sell {
+            background-color: rgba(220, 53, 69, 0.1);
+            border-left: 4px solid #dc3545;
+        }
+        
+        /* Signal Styles */
+        .signal-buy {
+            color: #28a745;
+        }
+        .signal-sell {
+            color: #dc3545;
+        }
+        
+        /* Table Styles */
+        #analysis-result table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        
+        #analysis-result th, #analysis-result td {
+            padding: 8px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        
+        #analysis-result th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        
+        #analysis-result h3 {
+            margin-top: 30px;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .alert-positive {
+            background-color: rgba(40, 167, 69, 0.1);
+            border-left: 4px solid #28a745;
+        }
+        
+        .alert-negative {
+            background-color: rgba(220, 53, 69, 0.1);
+            border-left: 4px solid #dc3545;
+        }
+        
+        .change-indicator {
+            font-weight: bold;
+        }
+        
+        .no-data {
+            color: #6c757d;
+            font-style: italic;
+            padding: 20px;
+            text-align: center;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .category-very-strong {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .category-strong {
+            color: #17a2b8;
+            font-weight: bold;
+        }
+        
+        .category-solid {
+            color: #ffc107;
+        }
+        
+        .category-weak {
+            color: #dc3545;
+        }
+        
+        .category-very-weak {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        
+        .recommendation-strong-buy {
+            color: #28a745;
+            font-weight: bold;
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+        
+        .recommendation-buy {
+            color: #28a745;
+            background-color: rgba(40, 167, 69, 0.05);
+        }
+        
+        .recommendation-hold {
+            color: #ffc107;
+        }
+        
+        .recommendation-sell {
+            color: #dc3545;
+            background-color: rgba(220, 53, 69, 0.05);
+        }
+        
+        .recommendation-strong-sell {
+            color: #dc3545;
+            font-weight: bold;
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+        
+        #tradingview-widget {
+            height: 500px;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+<%- include('partials/footer') %>
+
+
+

@@ -1,0 +1,9 @@
+<!-- src/views/report.ejs -->
+<%- include('partials/header', { cssFile: 'report' }) %>
+    <div class="report-container">
+        <h1>Daily Stock Report</h1>
+        <div id="report-content">
+            <p><%= report %></p>
+        </div>
+    </div>
+<%- include('partials/footer') %>

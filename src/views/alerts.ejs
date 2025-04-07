@@ -1,0 +1,34 @@
+<%- include('partials/header', { cssFile: 'alerts', user: user }) %>
+    <div class="alerts-container">
+        <h1>All Alerts</h1>
+        <button id="manualCheck">Manually Run Check</button>
+
+        <div id="alerts-section">
+            <% if (allAlerts && allAlerts.length > 0) { %>
+                <% allAlerts.forEach(alert => { %>
+                    <div class="alert <%= alert.change > 0 ? 'alert-positive' : 'alert-negative' %>">
+                        <p>
+                            <%= alert.symbol %>: 
+                            <span class="change-indicator"><%= alert.change > 0 ? "↑" : "↓" %></span>
+                            <% if (alert.fallback) { %>
+                                <span class="no-data">No recent data</span>
+                            <% } else { %>
+                                <%= Math.abs(alert.change).toFixed(2) %>
+                                <% if (alert.previousPrice) { %>
+                                    (<%= ((alert.change / alert.previousPrice) * 100).toFixed(2) %>%)
+                                <% } %>
+                            <% } %>
+                        </p>
+                        <p class="alert-date">
+                            <%= new Date(alert.date).toLocaleString() %>
+                        </p>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p>No alerts found.</p>
+            <% } %>
+        </div>
+    </div>
+    <script src="/js/alerts.js"></script>
+<%- include('partials/footer') %>
+
